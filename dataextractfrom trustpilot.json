@@ -1,0 +1,274 @@
+{
+  "name": "dataextractfrom trustpilot",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 13
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -432,
+        -240
+      ],
+      "id": "baf9edcc-f6f7-4abc-a599-aff1258617d7",
+      "name": "Daily Scheduler"
+    },
+    {
+      "parameters": {
+        "url": "https://trustpilot-company-and-reviews-data.p.rapidapi.com/company-reviews",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "company_domain",
+              "value": "gossby.com"
+            },
+            {
+              "name": "date_posted",
+              "value": "any"
+            },
+            {
+              "name": "locale",
+              "value": "en-US"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-rapidapi-host",
+              "value": "trustpilot-company-and-reviews-data.p.rapidapi.com"
+            },
+            {
+              "name": "x-rapidapi-key",
+              "value": "3843ad77f4mshff310eedf39d0a1p150c94jsn16b31e5319a8"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -432,
+        -32
+      ],
+      "id": "65878492-c0ba-4817-babb-f084d5ddc7fc",
+      "name": "Fetch Trustpilot Reviews"
+    },
+    {
+      "parameters": {
+        "jsCode": "// map all reviews to simplified format\nreturn items[0].json.data.reviews.map(review => {\n  return {\n    json: {\n      \n      text: review.review_text,\n      rating: review.review_rating,\n      date: review.review_time,\n      consumer_name: review.consumer_name,\n      \n      \n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -416,
+        176
+      ],
+      "id": "029e4693-0f37-4692-bb74-a608724e47c5",
+      "name": "Format Reviews Data"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1UrEy6MY7H-5UDcYSHdhlj4t8-y5MGSPlDKiUpKDbqfo",
+          "mode": "list",
+          "cachedResultName": "trustpilot revi",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1UrEy6MY7H-5UDcYSHdhlj4t8-y5MGSPlDKiUpKDbqfo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://docs.google.com/spreadsheets/d/1UrEy6MY7H-5UDcYSHdhlj4t8-y5MGSPlDKiUpKDbqfo/edit#gid=0",
+          "__regex": "https:\\/\\/docs\\.google\\.com\\/spreadsheets\\/d\\/[0-9a-zA-Z\\-_]+.*\\#gid=([0-9]+)"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "text",
+              "displayName": "text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "rating",
+              "displayName": "rating",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "consumer_name",
+              "displayName": "consumer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "useAppend": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -96,
+        -96
+      ],
+      "id": "30c94495-589f-4861-a9be-fc48c9758f14",
+      "name": "Save Reviews to Google Sheets",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "zahgYyQY2ApTk66r",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "=data",
+        "options": {
+          "fileName": "trustpilot extract data",
+          "headerRow": true
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        144,
+        64
+      ],
+      "id": "9c309a88-f235-43c5-9014-3025cb5dac08",
+      "name": "Export Reviews File"
+    },
+    {
+      "parameters": {
+        "fromEmail": "rupak.stat16@gmail.com",
+        "toEmail": "rupak.aideveloper@gmail.com",
+        "subject": "Trustpilot data has been extracted!",
+        "html": "<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Trustpilot Data Notification</title>\n  <style>\n    body {\n      font-family: Arial, sans-serif;\n      line-height: 1.6;\n      color: #333333;\n      background-color: #f7f7f7;\n      padding: 20px;\n    }\n    .container {\n      max-width: 600px;\n      margin: auto;\n      background-color: #ffffff;\n      padding: 20px;\n      border-radius: 8px;\n      box-shadow: 0 0 10px rgba(0,0,0,0.1);\n    }\n    h2 {\n      color: #00b67a;\n    }\n    p {\n      font-size: 16px;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <h2>Trustpilot Data Extraction Completed</h2>\n    <p>This is to notify you that <strong>Trustpilot data has been successfully extracted</strong>!</p>\n    <p>You can now review the data or process it further as needed.</p>\n  </div>\n</body>\n</html>\n",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        352,
+        -176
+      ],
+      "id": "c195bbf0-21a7-416d-a45a-0cb5bdccc628",
+      "name": "Email Notification",
+      "webhookId": "2f9e1b2f-f675-49fe-98ee-79581a84d697",
+      "credentials": {
+        "smtp": {
+          "id": "cLddjvoV8gQeBIoG",
+          "name": "SMTP account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Daily Scheduler": {
+      "main": [
+        [
+          {
+            "node": "Fetch Trustpilot Reviews",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Trustpilot Reviews": {
+      "main": [
+        [
+          {
+            "node": "Format Reviews Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Reviews Data": {
+      "main": [
+        [
+          {
+            "node": "Save Reviews to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Reviews to Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Export Reviews File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Export Reviews File": {
+      "main": [
+        [
+          {
+            "node": "Email Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "71c79170-d4dd-4d49-8f22-3bf26d4f26b9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "418c73e00c5157b95243ccb02fcb19f0645cffb6e90c89e6562547d6a5d3f7e5"
+  },
+  "id": "GciWSL49w4mlCAm5",
+  "tags": []
+}
